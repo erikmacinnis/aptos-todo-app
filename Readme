@@ -1,0 +1,6 @@
+Command to publish the module
+aptos move create-resource-account-and-publish-package --seed 123 --address-name todo_list_addr --profile default --named-addresses source_addr=0x609eb53752cfa1acba492a3c40710e84daea8730e518102cbfb1ca5763216d0e
+
+devenet resource addr = 0x07f147dc045ecdfd5c5a54f214d02d76b7492bf3f831674ec016e9a0d3f4f83d
+
+aptos move test --named-addresses todo_list_addr=0x07f147dc045ecdfd5c5a54f214d02d76b7492bf3f831674ec016e9a0d3f4f83d,source_addr=0x609eb53752cfa1acba492a3c40710e84daea8730e518102cbfb1ca5763216d0e
