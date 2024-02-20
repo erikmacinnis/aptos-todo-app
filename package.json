@@ -1,0 +1,18 @@
+{
+  "name": "todo-app-v2",
+  "version": "1.0.0",
+  "description": "Command to publish the module aptos move create-resource-account-and-publish-package --seed 123 --address-name todo_list_addr --profile default --named-addresses source_addr=0x609eb53752cfa1acba492a3c40710e84daea8730e518102cbfb1ca5763216d0e",
+  "main": "index.js",
+  "scripts": {
+    "test": "cucumber-js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@cucumber/cucumber": "^10.3.1"
+  },
+  "dependencies": {
+    "@aptos-labs/ts-sdk": "^1.7.0",
+    "dotenv": "^16.4.5"
+  }
+}

@@ -5,7 +5,9 @@ module todo_list_addr::todo_list_with_resource_account {
     use std::signer;
     use std::vector;
     use std::string::String;
+
     use aptos_std::simple_map::{Self, SimpleMap};
+    
     use aptos_framework::account;
     use aptos_framework::resource_account;
     use aptos_token::token;
@@ -243,16 +245,23 @@ module todo_list_addr::todo_list_with_resource_account {
         };
     }
 
-    fun mint_token(task: &mut Task, module_data: &mut ModuleData) {
+    // Checks a task, updates completed_task_pre_user map, and updating the leaderboard
+    public entry fun check_task(receiver: &signer, index: u64) acquires ModuleData {
+        let module_data = borrow_global_mut<ModuleData>(@todo_list_addr);
+
+        let token_data_params = module_data.create_token_data_params;
+
+        let todo = &mut module_data.todo;
+        // Getting the task at given index
+        let task = vector::borrow_mut<Task>(&mut todo.tasks, index);
+
         // Create a signer of the resource account from the signer capability stored in this module.
         // Using a resource account and storing its signer capability within the module allows the module to programmatically
         // sign transactions on behalf of the module.
         let resource_signer = account::create_signer_with_capability(&module_data.signer_cap);
 
-        let token_data_params = module_data.create_token_data_params;
-
-        // Create a token data id to specify the token to be minted.
-        // Updating the task.content field
+         // Create a token data id to specify the token to be minted.
+         // Updating the task.content field
         let token_data_id = token::create_tokendata(
             &resource_signer,
             token_data_params.collection_name,
@@ -272,17 +281,6 @@ module todo_list_addr::todo_list_with_resource_account {
         // Miting the NFT with the unique description
         let token_id = token::mint_token(&resource_signer, token_data_id, 1);
         token::direct_transfer(&resource_signer, receiver, token_id, 1);
-    }
-
-    // Checks a task, updates completed_task_pre_user map, and updating the leaderboard
-    public entry fun check_task(receiver: &signer, index: u64) acquires ModuleData {
-        let module_data = borrow_global_mut<ModuleData>(@todo_list_addr);
-
-        let todo = &mut module_data.todo;
-        // Getting the task at given index
-        let task = vector::borrow_mut<Task>(&mut todo.tasks, index);
-
-        mint_token(task, module_data);
 
         // Setting completed to true
         task.completed = true;

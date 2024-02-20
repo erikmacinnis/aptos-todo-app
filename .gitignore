@@ -1,1 +1,5 @@
 .aptos
+
+.env
+
+node_modules
