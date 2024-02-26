@@ -1,7 +1,8 @@
 Feature: Deployment
 
-    The owner of the smart contract deploys it.
-    Scenario: Smart contract is deployed.
-        Given Nothing
-        When Smart contract was initialized
-        Then Resource account is created, with expected values
+    Rule: Initializing values when deploying the smart contract
+
+        Scenario: Deploying smart contract
+            Given Undeployed Smart contract
+            When Smart contract is
+            Then Resource account is created, with expected values

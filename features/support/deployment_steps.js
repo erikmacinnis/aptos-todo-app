@@ -1,6 +1,9 @@
-const {Given, When, Then} = require('@cucumber/cucumber')
+const {Given, When, Then, setDefaultTimeout} = require('@cucumber/cucumber')
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
+
 require('dotenv').config()
 
 const { Account, Ed25519PrivateKey, RawTransaction, FixedBytes, TypeTagU8, TypeTagVector, ChainId, TransactionPayloadEntryFunction, EntryFunction } = require("@aptos-labs/ts-sdk");
@@ -8,6 +11,8 @@ const { Account, Ed25519PrivateKey, RawTransaction, FixedBytes, TypeTagU8, TypeT
 const aptos = require('./aptos')
 
 const accountStartBal = 1_000_000_000
+
+setDefaultTimeout(10000)
 
 async function getNewAccount() {
     const account = Account.generate()
@@ -41,12 +46,12 @@ async function getModuleBytecode() {
         // Read the contents of the binary file asynchronously
         const data = fs.readFileSync(filePath);
         const hexString = data.toString('hex');
-        return hexString
-        // return [hexString]
+        // return hexString
+        return [hexString]
         // const hexArray = Array.from(data).map(byte => byte.toString(16).padStart(2, '0'));
         // const hexArray = Array.from(data).map(byte => parseInt(byte, 16));
         // return [hexArray];
-        return hexArray
+        // return hexArray
     } catch (err) {
         console.error(`Error reading file: ${err.message}`);
         return null;
@@ -71,92 +76,78 @@ async function getMetadataBytes() {
     }
 }
 
-Given('Nothing', async function () {
-    const moduleBytecode = await getModuleBytecode()
-    console.log(moduleBytecode)
-    const metadataBytes = await getMetadataBytes()
-    console.log(metadataBytes)
+function getResourceAccountAddress(inputString) {
+    // Regular expression to match the pattern of the address
+    const regex = /Do you want to publish this package under the resource account's address (0x[a-fA-F0-9]+)\?/;
+    const match = inputString.match(regex);
 
-    const account = await getAccount()
+    // If a match is found, return the address; otherwise, return null
+    return match ? match[1] : null;
+}
 
-    // console.log(account.accountAddress.toString())
-
-    // const publishTx = await aptos.publishPackageTransaction({
-    //     account: account.accountAddress,
-    //     metadataBytes: metadataBytes,
-    //     moduleBytecode: moduleBytecode,
-    // })
-
-    // const publishTxSubmit = await aptos.signAndSubmitTransaction({
-    //     signer: account,
-    //     transaction: publishTx,
-    // })
-
-    // await aptos.waitForTransaction({transactionHash: publishTxSubmit.hash})
-
-    
-
-    const entryFun = new EntryFunction(
-        '0x0000000000000000000000000000000000000000000000000000000000000001::resource_account',
-        'create_resource_account_and_publish_package',
-        [
-            new TypeTagVector(new TypeTagU8()),
-            new TypeTagVector(new TypeTagU8()),
-            new TypeTagVector(new TypeTagVector(new TypeTagU8())),
-        ],
-        [
-            new FixedBytes(new Uint8Array([1, 2, 3])),
-            new FixedBytes(metadataBytes),
-            [new FixedBytes(moduleBytecode)]
-        ],
-    )  
-
-    const rawTx = new RawTransaction(
-        account.accountAddress,
-        BigInt(1),
-        new TransactionPayloadEntryFunction(entryFun),
-        BigInt(100_000_000),
-        BigInt(1000),
-        BigInt(60),
-        new ChainId(4),
-        )
-
-    const simpleTx = {
-        rawTransaction: rawTx,
-        feePayerAddress: account.accountAddress,
+// Deploys the smart contract and waits for the bash script to be done
+async function deployContractWithResourceAccount() {
+    try {
+        const { stdout, stderr } = await exec('./features/support/deploy_contract.sh');
+        const resourceAccountAddress = getResourceAccountAddress(stdout)
+        return { stdout, stderr, resourceAccountAddress };
+    } catch (error) {
+        console.error('Error occurred:', error);
+        throw error; // Rethrow the error to propagate it to the caller
     }
-
-    // const transaction = {
-    //     data : {
-    //         function:`0x0000000000000000000000000000000000000000000000000000000000000001::resource_account::create_resource_account_and_publish_package`,
-    //         functionArguments:[
-    //             [1,2,3],
-    //             metadataBytes,
-    //             moduleBytecode,
-    //         ]
-    //     }
-    // }
-
-    const publishTxSubmit = await aptos.signAndSubmitTransaction({
-        signer: account,
-        transaction: simpleTx,
-    })
-
-    await aptos.waitForTransaction({transactionHash:publishTxSubmit.hash});
-
-    console.log(publishTxSubmit)
+}
 
 
-
+Given('Undeployed Smart contract', async function () {
     // Write code here that turns the phrase above into concrete actions
-    return true;
+    const {resourceAccountAddress} = await deployContractWithResourceAccount()
+
+    const moduleData = await aptos.getAccountResource(
+        {
+            accountAddress: resourceAccountAddress,
+            resourceType:`${resourceAccountAddress}::todo_list_with_resource_account::ModuleData`
+        }
+    );
+
+    console.log(moduleData)
+    return 'pending';
 });
 
-When('Smart contract was initialized', function () {
+When('Smart contract is', function () {
     // Write code here that turns the phrase above into concrete actions
-    return true;
+    return 'pending';
 });
+
 Then('Resource account is created, with expected values', function () {
     // Write code here that turns the phrase above into concrete actions
-    return true;
+    return 'pending';
 });
+
+// Given('Nothing', async function () {
+//     const moduleBytecode = await getModuleBytecode()
+//     console.log(moduleBytecode)
+//     const metadataBytes = await getMetadataBytes()
+//     console.log(metadataBytes)
+
+//     const account = await getAccount()
+
+//     console.log(account.accountAddress.toString())
+
+//     const publishTx = await aptos.publishPackageTransaction({
+//         account: account.accountAddress,
+//         metadataBytes: metadataBytes,
+//         moduleBytecode: moduleBytecode,
+//     })
+
+//     const publishTxSubmit = await aptos.signAndSubmitTransaction({
+//         signer: account,
+//         transaction: publishTx,
+//     })
+
+//     await aptos.waitForTransaction({transactionHash: publishTxSubmit.hash})
+
+//     console.log(publishTxSubmit)
+
+//     // Write code here that turns the phrase above into concrete actions
+//     return true;
+// });
