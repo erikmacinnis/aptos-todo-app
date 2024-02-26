@@ -10,71 +10,7 @@ const { Account, Ed25519PrivateKey, RawTransaction, FixedBytes, TypeTagU8, TypeT
 
 const aptos = require('./aptos')
 
-const accountStartBal = 1_000_000_000
-
 setDefaultTimeout(10000)
-
-async function getNewAccount() {
-    const account = Account.generate()
-    await aptos.fundAccount({
-        accountAddress: account.accountAddress,
-        amount: accountStartBal,
-    })
-
-    return account
-}
-
-async function getAccount() {
-    const derivationPath = process.env.DERIVATION_PATH
-    const seedPhrase = process.env.MNEMONIC_PHRASE
-
-    const privKey = await Ed25519PrivateKey.fromDerivationPath(derivationPath, seedPhrase)
-    const account = await Account.fromPrivateKey({privateKey: privKey})
-
-    await aptos.fundAccount({
-        accountAddress: account.accountAddress,
-        amount: accountStartBal,
-    })
-
-    return account
-}
-
-async function getModuleBytecode() {
-    const filePath = path.join(__dirname, '../../move/build/todo_list/bytecode_modules/todo_list_with_resource_account.mv');
-
-    try {
-        // Read the contents of the binary file asynchronously
-        const data = fs.readFileSync(filePath);
-        const hexString = data.toString('hex');
-        // return hexString
-        return [hexString]
-        // const hexArray = Array.from(data).map(byte => byte.toString(16).padStart(2, '0'));
-        // const hexArray = Array.from(data).map(byte => parseInt(byte, 16));
-        // return [hexArray];
-        // return hexArray
-    } catch (err) {
-        console.error(`Error reading file: ${err.message}`);
-        return null;
-    }
-}
-
-async function getMetadataBytes() {
-    const filePath = path.join(__dirname, '../../move/build/todo_list/package-metadata.bcs')
-    try {
-        // Read the contents of the binary file asynchronously
-        const data = fs.readFileSync(filePath);
-        // const hexArray = Array.from(data).map(byte => byte.toString(16).padStart(2, '0'));
-        // const hexArray = Array.from(data).map(byte => parseInt(byte, 16));
-        // return hexArray
-        const hexString = data.toString('hex');
-        // const hexValue = `0x${hexString}`;
-        // return hexValue;
-        return hexString
-    } catch (err) {
-        console.error(`Error reading file: ${err.message}`);
-        return null;
-    }
-}
 
 function getResourceAccountAddress(inputString) {
     // Regular expression to match the pattern of the address
@@ -122,32 +58,3 @@ Then('Resource account is created, with expected values', function () {
     // Write code here that turns the phrase above into concrete actions
     return 'pending';
 });
-
-// Given('Nothing', async function () {
-//     const moduleBytecode = await getModuleBytecode()
-//     console.log(moduleBytecode)
-//     const metadataBytes = await getMetadataBytes()
-//     console.log(metadataBytes)
-
-//     const account = await getAccount()
-
-//     console.log(account.accountAddress.toString())
-
-//     const publishTx = await aptos.publishPackageTransaction({
-//         account: account.accountAddress,
-//         metadataBytes: metadataBytes,
-//         moduleBytecode: moduleBytecode,
-//     })
-
-//     const publishTxSubmit = await aptos.signAndSubmitTransaction({
-//         signer: account,
-//         transaction: publishTx,
-//     })
-
-//     await aptos.waitForTransaction({transactionHash: publishTxSubmit.hash})
-
-//     console.log(publishTxSubmit)
-
-//     // Write code here that turns the phrase above into concrete actions
-//     return true;
-// });
