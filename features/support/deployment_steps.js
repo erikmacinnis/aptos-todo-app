@@ -1,14 +1,11 @@
 const {Given, When, Then, setDefaultTimeout} = require('@cucumber/cucumber')
-const fs = require('fs');
-const path = require('path');
+const __ = require('hamjest');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
 require('dotenv').config()
 
-const { Account, Ed25519PrivateKey, RawTransaction, FixedBytes, TypeTagU8, TypeTagVector, ChainId, TransactionPayloadEntryFunction, EntryFunction } = require("@aptos-labs/ts-sdk");
-
-const aptos = require('./aptos')
+const aptos = require('./aptos');
 
 setDefaultTimeout(10000)
 
@@ -33,28 +30,52 @@ async function deployContractWithResourceAccount() {
     }
 }
 
+// async function setUpLocalBlockchain() { 
+//     try {
+//         await exec('./features/support/setup_local_env.sh');
+//     } catch (error) {
+//         console.error('Error occurred:', error);
+//         throw error; // Rethrow the error to propagate it to the caller
+//     }
+// }
+
+// Before(function () {
+//     setUpLocalBlockchain();
+// })
 
 Given('Undeployed Smart contract', async function () {
+    return true;
+});
+
+When('Smart contract is', async function () {
     // Write code here that turns the phrase above into concrete actions
     const {resourceAccountAddress} = await deployContractWithResourceAccount()
 
-    const moduleData = await aptos.getAccountResource(
+    this.moduleData = await aptos.getAccountResource(
         {
             accountAddress: resourceAccountAddress,
             resourceType:`${resourceAccountAddress}::todo_list_with_resource_account::ModuleData`
         }
     );
 
-    console.log(moduleData)
-    return 'pending';
-});
-
-When('Smart contract is', function () {
-    // Write code here that turns the phrase above into concrete actions
-    return 'pending';
+    return true;
 });
 
 Then('Resource account is created, with expected values', function () {
     // Write code here that turns the phrase above into concrete actions
-    return 'pending';
+    console.log(this.moduleData)
+
+    const createTokenDataParams = this.moduleData.create_token_data_params
+    __.assertThat(createTokenDataParams.collection_name, __.equalTo('Todo Collection'))
+    __.assertThat(createTokenDataParams.token_name, __.equalTo('Move Todo'))
+
+    const todo = this.moduleData.todo
+    __.assertThat(todo.leaderboard.length, __.equalTo(10))
+
+    return true;
 });
+
+// After(async function () {
+//     exec('./docker stop local-testnet-postgres || true && docker rm local-testnet-postgres || true')
+//     exec('./docker stop local-testnet-indexer-api || true && docker rm local-testnet-indexer-api || true')
+// })
