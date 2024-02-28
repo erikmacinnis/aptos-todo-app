@@ -30,19 +30,6 @@ async function deployContractWithResourceAccount() {
     }
 }
 
-// async function setUpLocalBlockchain() { 
-//     try {
-//         await exec('./features/support/setup_local_env.sh');
-//     } catch (error) {
-//         console.error('Error occurred:', error);
-//         throw error; // Rethrow the error to propagate it to the caller
-//     }
-// }
-
-// Before(function () {
-//     setUpLocalBlockchain();
-// })
-
 Given('Undeployed Smart contract', async function () {
     return true;
 });
@@ -74,8 +61,3 @@ Then('Resource account is created, with expected values', function () {
 
     return true;
 });
-
-// After(async function () {
-//     exec('./docker stop local-testnet-postgres || true && docker rm local-testnet-postgres || true')
-//     exec('./docker stop local-testnet-indexer-api || true && docker rm local-testnet-indexer-api || true')
-// })
