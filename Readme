@@ -10,3 +10,6 @@ aptos move compile --save-metadata --named-addresses todo_list_addr=0x07f147dc04
 
 aptos move compile --save-metadata --named-addresses todo_list_addr=0xa53112b7859564efe65fe881d8146fc5ec0728d4283ad159b4ebed73cbb37d3a,source_addr=0x949d60b0604cbb3f4b0dfe5a4ba38604e07028224d24f476222fd927660bdcd0
 
+* This sets up the local blockchain for testing with docker
+./features/support/setup_local_env.sh
+
