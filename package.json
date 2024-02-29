@@ -4,7 +4,8 @@
   "description": "Command to publish the module aptos move create-resource-account-and-publish-package --seed 123 --address-name todo_list_addr --profile default --named-addresses source_addr=0x609eb53752cfa1acba492a3c40710e84daea8730e518102cbfb1ca5763216d0e",
   "main": "index.js",
   "scripts": {
-    "test": "cucumber-js -f @cucumber/pretty-formatter"
+    "test": "cucumber-js -f @cucumber/pretty-formatter",
+    "setup_test": "./features/support/setup_local_env.sh"
   },
   "author": "",
   "license": "ISC",

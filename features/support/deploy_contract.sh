@@ -1,8 +1,6 @@
 #!/bin/bash
 cd move
 
-pwd
-
 # Extract the version from the YAML file
 address=$(yq e '.profiles.default.account' .aptos/config.yaml)
 

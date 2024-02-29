@@ -13,3 +13,4 @@ aptos move compile --save-metadata --named-addresses todo_list_addr=0xa53112b785
 * This sets up the local blockchain for testing with docker
 ./features/support/setup_local_env.sh
 
+aptos move run --function-id 0x459208a6d0fa06faf6b2d711efaa3e88d0d3278cedbe09fe27d16fe42365add4::todo_list_with_resource_account::create_task --args string:content --assume-yes
