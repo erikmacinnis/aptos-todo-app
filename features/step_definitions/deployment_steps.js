@@ -3,7 +3,7 @@ const __ = require('hamjest');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
-const aptos = require('../support/aptos');
+const {aptos} = require('../support/aptos');
 
 const {deployContractWithResourceAccount} = require('../support/deployContract');
 
